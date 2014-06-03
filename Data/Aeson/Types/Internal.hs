@@ -291,6 +291,9 @@ data Options = Options
       -- object will include those fields mapping to @null@.
     , sumEncoding :: SumEncoding
       -- ^ Specifies how to encode constructors of a sum datatype.
+    , verboseFailures :: Bool
+      -- ^ If 'True' failures are reported more verbosely. In particular
+      -- enclosing property labels are reported.
     }
 
 -- | Specifies how to encode constructors of a sum datatype.
@@ -327,6 +330,7 @@ data SumEncoding =
 -- , 'allNullaryToStringTag'   = True
 -- , 'omitNothingFields'       = False
 -- , 'sumEncoding'             = 'defaultTaggedObject'
+-- , 'verboseFailures'         = False
 -- }
 -- @
 defaultOptions :: Options
@@ -336,6 +340,7 @@ defaultOptions = Options
                  , allNullaryToStringTag   = True
                  , omitNothingFields       = False
                  , sumEncoding             = defaultTaggedObject
+                 , verboseFailures         = False
                  }
 
 -- | Default 'TaggedObject' 'SumEncoding' options:

@@ -86,6 +86,7 @@ import Data.Aeson.Types ( Value(..), Parser
                         , SumEncoding(..)
                         , defaultOptions
                         , defaultTaggedObject
+                        , modifyFailure
                         )
 -- from base:
 import Control.Applicative ( pure, (<$>), (<*>) )
@@ -621,7 +622,8 @@ parseRecord opts tName conName ts obj =
            (infixApp (conE conName) [|(<$>)|] x)
            xs
     where
-      x:xs = [ [|lookupField|]
+      verbose = verboseFailures opts
+      x:xs = [ [|lookupField verbose|]
                `appE` (litE $ stringL $ show tName)
                `appE` (litE $ stringL $ constructorTagModifier opts $ nameBase conName)
                `appE` (varE obj)
@@ -750,16 +752,20 @@ parseTypeMismatch tName conName expected actual =
           ]
 
 class (FromJSON a) => LookupField a where
-    lookupField :: String -> String -> Object -> T.Text -> Parser a
+    lookupField :: Bool -> String -> String -> Object -> T.Text -> Parser a
 
 instance (FromJSON a) => LookupField a where
-    lookupField tName rec obj key =
+    lookupField verbose tName rec obj key =
         case H.lookup key obj of
           Nothing -> unknownFieldFail tName rec (T.unpack key)
-          Just v  -> parseJSON v
+          Just v  -> propErr $ parseJSON v
+      where
+        propErr
+            | verbose = modifyFailure (\e -> "failed to parse property " ++ T.unpack key ++ ": " ++ e)
+            | otherwise = \e -> e
 
 instance (FromJSON a) => LookupField (Maybe a) where
-    lookupField _ _ = (.:?)
+    lookupField _ _ _ = (.:?)
 
 unknownFieldFail :: String -> String -> String -> Parser fail
 unknownFieldFail tName rec key =

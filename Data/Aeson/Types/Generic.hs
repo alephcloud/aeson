@@ -490,9 +490,12 @@ instance (FromRecord a, FromRecord b) => FromRecord (a :*: b) where
     {-# INLINE parseRecord #-}
 
 instance (Selector s, GFromJSON a) => FromRecord (S1 s a) where
-    parseRecord opts = maybe (notFound label) (gParseJSON opts)
+    parseRecord opts = maybe (notFound label) (propErr . gParseJSON opts)
                       . H.lookup (pack label)
         where
+          propErr
+              | verboseFailures opts = modifyFailure (\e -> "failed to parse property " ++ label ++ ": " ++ e)
+              | otherwise = id
           label = fieldLabelModifier opts $ selName (undefined :: t s a p)
     {-# INLINE parseRecord #-}
 
