@@ -45,7 +45,9 @@ module Data.Aeson.Types.Instances
     -- * Functions
     , fromJSON
     , (.:)
+    , (!:)
     , (.:?)
+    , (!:?)
     , (.!=)
     , (.=)
     , typeMismatch
@@ -735,6 +737,16 @@ obj .: key = case H.lookup key obj of
                Just v  -> parseJSON v
 {-# INLINE (.:) #-}
 
+-- | A version of '(.:)' that produces more verbose error messages.
+--
+(!:) :: (FromJSON a) => Object -> Text -> Parser a
+obj !: key = case H.lookup key obj of
+               Nothing -> fail $ "key " ++ show key ++ " not present"
+               Just v  -> modifyFailure propErr $ parseJSON v
+  where
+    propErr e = "failed to parse property " ++ show key ++ ": " ++ e
+{-# INLINE (!:) #-}
+
 -- | Retrieve the value associated with the given key of an 'Object'.
 -- The result is 'Nothing' if the key is not present, or 'empty' if
 -- the value cannot be converted to the desired type.
@@ -747,6 +759,16 @@ obj .:? key = case H.lookup key obj of
                Nothing -> pure Nothing
                Just v  -> parseJSON v
 {-# INLINE (.:?) #-}
+
+-- | A version of '(!:)' that produces more verbose error messages.
+--
+(!:?) :: (FromJSON a) => Object -> Text -> Parser (Maybe a)
+obj !:? key = case H.lookup key obj of
+               Nothing -> pure Nothing
+               Just v  -> modifyFailure propErr $ parseJSON v
+  where
+    propErr e = "failed to parse property " ++ show key ++ ": " ++ e
+{-# INLINE (!:?) #-}
 
 -- | Helper for use in combination with '.:?' to provide default
 -- values for optional JSON object fields.

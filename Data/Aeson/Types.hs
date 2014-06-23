@@ -53,7 +53,9 @@ module Data.Aeson.Types
     -- * Constructors and accessors
     , (.=)
     , (.:)
+    , (!:)
     , (.:?)
+    , (!:?)
     , (.!=)
     , object
 

@@ -73,7 +73,9 @@ module Data.Aeson
     -- * Constructors and accessors
     , (.=)
     , (.:)
+    , (!:)
     , (.:?)
+    , (!:?)
     , (.!=)
     , object
     -- * Parsing

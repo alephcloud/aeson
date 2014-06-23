@@ -77,7 +77,7 @@ module Data.Aeson.TH
 --------------------------------------------------------------------------------
 
 -- from aeson:
-import Data.Aeson ( toJSON, Object, object, (.=), (.:), (.:?)
+import Data.Aeson ( toJSON, Object, object, (.=), (.:), (.:?), (!:?)
                   , ToJSON, toJSON
                   , FromJSON, parseJSON
                   )
@@ -765,7 +765,8 @@ instance (FromJSON a) => LookupField a where
             | otherwise = \e -> e
 
 instance (FromJSON a) => LookupField (Maybe a) where
-    lookupField _ _ _ = (.:?)
+    lookupField True _ _ = (!:?)
+    lookupField False _ _ = (.:?)
 
 unknownFieldFail :: String -> String -> String -> Parser fail
 unknownFieldFail tName rec key =
